@@ -1,4 +1,5 @@
-require "defines"
+--require "defines"
+--0.13 no longer requires this define...
 
 DEBUG = true
 
@@ -55,6 +56,23 @@ script.on_event(defines.events.on_built_entity, function(event) onBuiltEventHand
 --script.on_event(defines.events.on_player_rotated_entity, function(event) onPlayerRotated(event) end)
 
 
+script.on_configuration_changed( 
+function(data)
+	if data.mod_changes ~= nil and data.mod_changes["My Mod"] ~= nil and data.mod_changes["My Mod"].new_version == "0.1.4" then
+	--I don't know how "My Mod" referred to this mod in specific
+	--recipes changes in 0.1.4
+		recipes["cs-express-transport-belt"].reload()
+		recipes["compound-splitter-endcap"].reload()
+		recipes["compound-splitter-lane"].reload()
+		recipes["compound-splitter-priority-totem"].reload()
+		recipes["compound-splitter-round-robin-totem"].reload()
+		recipes["compound-splitter-buffer"].reload()
+		
+	end
+end
+)
+
+
 function onInit(event)
 --nothing major needed here hopefully
 	global.splitters = global.splitters or {}
@@ -98,7 +116,7 @@ function handleSplitterBuffered(i)
 			
 		until (uC >= u or oE > #global.splitters[i].outlines)
 	end
-	if (uC ~= 1 or bSize <400) then
+	if (uC ~= 1 or bSize <960) then
 		iC = (global.splitters[i].informat == FORMAT.ROUND_ROBIN) and global.splitters[i].inC or 1 
 		iE = 1
 		repeat 
@@ -118,7 +136,7 @@ function handleSplitterBuffered(i)
 			iC = iC + 1
 			iE = iE + 1
 			if (iC > #global.splitters[i].inlines) then iC = 1 end--handle round robin array overflow
-		until (bSize >=400 or iE > #global.splitters[i].inlines)
+		until (bSize >=960 or iE > #global.splitters[i].inlines)
 		global.splitters[i].inC = iC
 	end
 
@@ -263,14 +281,16 @@ function onBuiltEventHandler(event)
 			i=i+1
 		    nEnt = nEnt.surface.find_entity("compound-splitter-lane",{nEnt.position.x+DV[search_dir].x,nEnt.position.y+DV[search_dir].y})
 	   	end
-	--find other endpost
+	--find the chest to be used (buffer, or smart-buffer)
 		if (pEnt ~= nil and pEnt.valid) then
 			bEnt = pEnt.surface.find_entity("compound-splitter-buffer",{pEnt.position.x+DV[search_dir].x,pEnt.position.y+DV[search_dir].y})
 			if (bEnt~=nil and bEnt.valid) then
 				--debugPrint("endcap found, prospective splitter size: " .. #lanes)
 			else
-				--debugPrint("place other endcap")
-				return				
+				bEnt = pEnt.surface.find_entity("compound-splitter-smart-buffer",{pEnt.position.x+DV[search_dir].x,pEnt.position.y+DV[search_dir].y})	
+				if (bEnt==nil) then 
+					return
+				end
 			end
 
 		end
@@ -377,7 +397,8 @@ function onBuiltEventHandler(event)
 				belts[1][#belts[1] - i + 1] = nEnt
 			end
 		end
-		if (math.abs(totem[2].position.x-belts[2][1].position.x) <=1) and
+		if (totem[2] ~= nil and totem[1].valid) and
+		(math.abs(totem[2].position.x-belts[2][1].position.x) <=1) and
 		   (math.abs(totem[2].position.y-belts[2][1].position.y) <=1) then
 		else
 			for i=1, math.floor(#belts[2] / 2) do--swap belts[2]
@@ -414,8 +435,8 @@ function onBuiltEventHandler(event)
 		newSplitter.endcap = aEnt
 		newSplitter.buffer = bEnt
 		newSplitter.totems = totem
-		newSplitter.informat = totem[input].name == "compound-splitter-round-robin-totem" and FORMAT.ROUND_ROBIN or FORMAT.PRIORITY
-		newSplitter.outformat = totem[output].name == "compound-splitter-round-robin-totem" and FORMAT.ROUND_ROBIN or FORMAT.PRIORITY
+		newSplitter.informat = (totem[input] ~= nil and totem[input].name == "compound-splitter-priority-totem" and FORMAT.PRIORITY) or FORMAT.ROUND_ROBIN 
+		newSplitter.outformat = (totem[output] ~= nil and totem[output].name == "compound-splitter-priority-totem" and FORMAT.PRIORITY) or FORMAT.ROUND_ROBIN
 		newSplitter.bounds = 
 		{
 			{aEnt.position.x + DV[PERP[search_dir].a].x,aEnt.position.y + DV[PERP[search_dir].a].y},

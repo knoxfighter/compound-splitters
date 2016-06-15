@@ -19,7 +19,7 @@ data:extend
     type = "item-subgroup",
     name = "cs-blocks",
     group = "compound-splitters",
-    order = "a",
+    order = "b",
   },
   {
 		type = "item",
@@ -56,7 +56,7 @@ data:extend
 		name = "compound-splitter-priority-totem",
 		icon = "__compoundsplitters__/graphics/icons/compound-splitter-priority-totem.png",
 		flags = {"goes-to-quickbar"},
-		subgroup = "cs-blocks",
+		subgroup = "cs-belts",
 		order = "a[compound-splitters]-c[compound-splitter-priority-totem]",
 		place_result = "compound-splitter-priority-totem",
 		stack_size = 10
@@ -66,7 +66,7 @@ data:extend
 		name = "compound-splitter-round-robin-totem",
 		icon = "__compoundsplitters__/graphics/icons/compound-splitter-round-robin-totem.png",
 		flags = {"goes-to-quickbar"},
-		subgroup = "cs-blocks",
+		subgroup = "cs-belts",
 		order = "a[compound-splitters]-d[compound-splitter-round-robin-totem]",
 		place_result = "compound-splitter-round-robin-totem",
 		stack_size = 10
@@ -80,6 +80,16 @@ data:extend
 		order = "a[compound-splitters]-e[compound-splitter-buffer]",
 		place_result = "compound-splitter-buffer",
 		stack_size = 10
-  }
+  },
+    {
+		type = "item",
+		name = "compound-splitter-smart-buffer",
+		icon = "__compoundsplitters__/graphics/icons/compound-splitter-smart-buffer.png",
+		flags = {"goes-to-quickbar"},
+		subgroup = "cs-blocks",
+		order = "a[compound-splitters]-e[compound-splitter-buffer]",
+		place_result = "compound-splitter-smart-buffer",
+		stack_size = 10
+  }  
 })
 

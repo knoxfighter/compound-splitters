@@ -1,4 +1,5 @@
 --entities for the compound splitter
+require ("prototypes.circuit-connector-sprites")
 
 data:extend(
 {
@@ -49,7 +50,11 @@ data:extend(
     ending_patch = ending_patch_prototype,
     ending_patch = ending_patch_prototype,
     fast_replaceable_group = "transport-belt",
-    speed = 0.09375
+    speed = 0.09375,
+    connector_frame_sprites = transport_belt_connector_frame_sprites,	
+    circuit_connector_sprites = transport_belt_circuit_connector_sprites,
+    circuit_wire_connection_point = transport_belt_circuit_wire_connection_point,
+    circuit_wire_max_distance = transport_belt_circuit_wire_max_distance	
   },
   {
     type = "simple-entity",
@@ -163,7 +168,7 @@ data:extend(
 	 }
 
   },--entry
-    {
+  {
     type = "container",
     name = "compound-splitter-buffer",
     icon = "__base__/graphics/icons/steel-chest.png",
@@ -189,11 +194,27 @@ data:extend(
     {
       filename = "__compoundsplitters__/graphics/entities/compound-splitter-buffer/compound-splitter-buffer.png",
       priority = "extra-high",
-      width = 62,
-      height = 41,
-      shift = {0.4, -0.13}
-    }
+      width = 48,
+      height = 34,
+      shift = {0.2, 0}
+    },
+    circuit_wire_connection_point =
+    {
+      shadow =
+      {
+        red = {0.734375, 0.453125},
+        green = {0.609375, 0.515625},
+      },
+      wire =
+      {
+        red = {0.40625, 0.21875},
+        green = {0.40625, 0.375},
+      }
+    },
+    circuit_connector_sprites = get_circuit_connector_sprites({0.1875, 0.15625}, nil, 18),
+    circuit_wire_max_distance = 7.5	
   },
 
   
-})
+}
+)

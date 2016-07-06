@@ -3,10 +3,13 @@ data:extend
   {
     type = "recipe",
     name = "cs-express-transport-belt",
-    enabled = true,
+    category = "crafting-with-fluid",	
+    enabled = false,
     ingredients =
     {
-      {"alien-artifact", 10}
+      {"express-transport-belt", 1},
+      {"advanced-circuit", 10},
+      {type="fluid", name="lubricant", amount=8}
     },
     energy_required = 10,
     result = "cs-express-transport-belt"
@@ -14,54 +17,62 @@ data:extend
   {
     type = "recipe",
     name = "compound-splitter-endcap",
-    enabled = true,
+    enabled = false,
     ingredients =
-    {
-      {"alien-artifact", 10}
-    },
+	{
+		{"steel-plate", 8},
+		{"electronic-circuit", 4},
+	},
     energy_required = 10,
     result = "compound-splitter-endcap"
   },
   {
     type = "recipe",
     name = "compound-splitter-lane",
-    enabled = true,
+    category = "crafting-with-fluid",	
+    enabled = false,
     ingredients =
     {
-      {"alien-artifact", 10}
+      {"iron-gear-wheel", 226},
+	  {"steel-plate", 68},
+      {"electronic-circuit", 48},
+      {"advanced-circuit", 30},
+      {type="fluid", name="lubricant", amount=32},
+	  {"processing-unit", 40}
     },
-    energy_required = 10,
+    energy_required = 60,
     result = "compound-splitter-lane"
   },
   {
     type = "recipe",
     name = "compound-splitter-priority-totem",
-    enabled = true,
-    ingredients =
-    {
-      {"alien-artifact", 10}
-    },
+    enabled = false,
+    ingredients = {
+	{"steel-plate", 8},
+	{"electronic-circuit", 4},
+	},
     energy_required = 10,
     result = "compound-splitter-priority-totem"
   },
   {
     type = "recipe",
     name = "compound-splitter-round-robin-totem",
-    enabled = true,
-    ingredients =
-    {
-      {"alien-artifact", 10}
-    },
+    enabled = false,
+    ingredients = {
+	{"steel-plate", 8},
+	{"electronic-circuit", 4},
+	},
     energy_required = 10,
     result = "compound-splitter-round-robin-totem"
   },
     {
     type = "recipe",
     name = "compound-splitter-buffer",
-    enabled = true,
+    enabled = false,
     ingredients =
     {
-      {"alien-artifact", 10}
+      {"steel-chest", 1},
+      {"electronic-circuit", 3}
     },
     energy_required = 10,
     result = "compound-splitter-buffer"

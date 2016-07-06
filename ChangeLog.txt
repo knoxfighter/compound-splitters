@@ -1,20 +1,37 @@
--0.1.3
-   - Packaged for the factorio forums
-   - Minor typos in locale(en) fixed
-   - known issue: recipes are not the final version and will be modded in. 
-   - known issue: hiccups happen when inserting a lot of items directly into the buffering chest
+-0.2.4
+   - fix for low output issue after 13.3
+   - knownissue: lane pieces, totems, and the endcap don't get saved in blueprints
 
-pre-release
+-0.2.3
+   - internal release
+
+-0.2.2 
+   - forgot change log
+
+-0.2.1
+   - Preliminary 0.13 release based on api changes: https://forums.factorio.com/25270
+   - Reverted buffer chest changes in 0.1.5 and made a 2nd valid chest. this should prevent items from being deleted when updating.
+   - Added tech tree (1 research)
+
+-0.1.5 (unreleased)
+   - Buffer chest turned into a smart chest.
+
+-0.1.4
+   - FIX: fixed unhandled exception when endcap was placed on splitter with no totems
+   - Official recipes made. a 16 lane CS should be about as expensive as a 16-lane belt-based splitter
+
+-0.1.3
+   - changed minor configuration info
 
 -0.1.2
    - added icons!
-   - performance: added a slow and sleep mode for splitters (9 tick, 60 tick)
+   - performance: added a slow and sleep mode for splitters (9 tick, 120 tick)
    - performance: mod uses no cpu when 0 splitters are active
    - performance: splitters under load use 33% less cpu time
 
 -0.1.1
    - added a chest that stores items in a buffer. the buffer should allow for 'peak limiting' which should further reduce the number of belts in an active state.
-   - splitter tries to output 'chest items'/10 items per lane (2 per belt) every 3 ticks.
+   - next.count / (TBD or 8) lanes have items added to output belts
    - this should allow for better output flow limiting.
    - known issue: since output lanes are limited by chest size for some items.
    - known issue: non-belt/buffer parts of the splitter can be removed without killing the output flow.

@@ -29,11 +29,7 @@ data:extend
       {
         type = "unlock-recipe",
         recipe = "compound-splitter-buffer"
-      },
-      {
-        type = "unlock-recipe",
-        recipe = "compound-splitter-smart-buffer"
-      }	  
+      }
     },
     prerequisites = {"logistics-3", "automation-3"},
     unit =

@@ -76,17 +76,5 @@ data:extend
     },
     energy_required = 10,
     result = "compound-splitter-buffer"
-  },
-   {
-    type = "recipe",
-    name = "compound-splitter-smart-buffer",
-    enabled = false,
-    ingredients =
-    {
-      {"compound-splitter-buffer", 1},
-      {"processing-unit", 3}
-    },
-    energy_required = 10,
-    result = "compound-splitter-smart-buffer"
   }
 })

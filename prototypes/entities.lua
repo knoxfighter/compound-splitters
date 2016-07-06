@@ -1,4 +1,5 @@
 --entities for the compound splitter
+require ("prototypes.circuit-connector-sprites")
 
 data:extend(
 {
@@ -49,7 +50,11 @@ data:extend(
     ending_patch = ending_patch_prototype,
     ending_patch = ending_patch_prototype,
     fast_replaceable_group = "transport-belt",
-    speed = 0.09375
+    speed = 0.09375,
+    connector_frame_sprites = transport_belt_connector_frame_sprites,	
+    circuit_connector_sprites = transport_belt_circuit_connector_sprites,
+    circuit_wire_connection_point = transport_belt_circuit_wire_connection_point,
+    circuit_wire_max_distance = transport_belt_circuit_wire_max_distance	
   },
   {
     type = "simple-entity",
@@ -164,56 +169,6 @@ data:extend(
 
   },--entry
   {
-    type = "smart-container",
-    name = "compound-splitter-smart-buffer",
-    icon = "__compoundsplitters__/graphics/icons/compound-splitter-smart-buffer.png",
-    flags = {"placeable-neutral", "player-creation"},
-    open_sound = { filename = "__base__/sound/metallic-chest-open.ogg", volume=0.65 },
-    close_sound = { filename = "__base__/sound/metallic-chest-close.ogg", volume = 0.7 },
-    minable =
-    {
-      hardness = 0.2,
-      mining_time = 0.5,
-      result = "compound-splitter-smart-buffer"
-    },
-    max_health = 150,
-    corpse = "small-remnants",
-    resistances =
-    {
-      {
-        type = "fire",
-        percent = 70
-      }
-    },
-    collision_box = {{-0.35, -0.35}, {0.35, 0.35}},
-    selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
-    fast_replaceable_group = "container",
-    inventory_size = 48,
-    vehicle_impact_sound =  { filename = "__base__/sound/car-metal-impact.ogg", volume = 0.65 },
-    picture =
-    {
-      filename = "__compoundsplitters__/graphics/entities/compound-splitter-smart-buffer/compound-splitter-smart-buffer.png",
-      priority = "extra-high",
-      width = 62,
-      height = 41,
-      shift = {0.4, -0.13}
-    },
-    circuit_wire_connection_point =
-    {
-      shadow =
-      {
-        red = {0.7, -0.3},
-        green = {0.7, -0.3}
-      },
-      wire =
-      {
-        red = {0.3, -0.8},
-        green = {0.3, -0.8}
-      }
-    },
-    circuit_wire_max_distance = 7.5
-  },
-      {
     type = "container",
     name = "compound-splitter-buffer",
     icon = "__base__/graphics/icons/steel-chest.png",
@@ -242,8 +197,24 @@ data:extend(
       width = 48,
       height = 34,
       shift = {0.2, 0}
-    }
+    },
+    circuit_wire_connection_point =
+    {
+      shadow =
+      {
+        red = {0.734375, 0.453125},
+        green = {0.609375, 0.515625},
+      },
+      wire =
+      {
+        red = {0.40625, 0.21875},
+        green = {0.40625, 0.375},
+      }
+    },
+    circuit_connector_sprites = get_circuit_connector_sprites({0.1875, 0.15625}, nil, 18),
+    circuit_wire_max_distance = 7.5	
   },
 
   
-})
+}
+)

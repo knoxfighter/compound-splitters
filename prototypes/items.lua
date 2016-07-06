@@ -81,15 +81,5 @@ data:extend
 		place_result = "compound-splitter-buffer",
 		stack_size = 10
   },
-    {
-		type = "item",
-		name = "compound-splitter-smart-buffer",
-		icon = "__compoundsplitters__/graphics/icons/compound-splitter-smart-buffer.png",
-		flags = {"goes-to-quickbar"},
-		subgroup = "cs-blocks",
-		order = "a[compound-splitters]-e[compound-splitter-buffer]",
-		place_result = "compound-splitter-smart-buffer",
-		stack_size = 10
-  }  
 })
 

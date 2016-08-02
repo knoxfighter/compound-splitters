@@ -211,15 +211,23 @@ function onBuiltEventHandler(event)
 		    currentEntity = currentEntity.surface.find_entity("compound-splitter-lane",{currentEntity.position.x+DV[search_dir].x,currentEntity.position.y+DV[search_dir].y})
 	   	end
 	--find the chest to be used (buffer, or smart-buffer)
+	
+		-- 2.6 search by entity type, not for exact entity name, should allow for any container to be used.
 		if (potentialEndcap ~= nil and potentialEndcap.valid) then
-			--buffer = potentialEndcap.surface.find_entities_filtered({area = {{potentialEndcap.position.x+DV[search_dir].x-.5,potentialEndcap.position.y+DV[search_dir].y-.5},{potentialEndcap.position.x+DV[search_dir].x+.5,potentialEndcap.position.y+DV[search_dir].y+.5}}, type="container"})[1]
-			--potential way to allow any chest become a buffer, add 2nd  search to allow logistic-container types too
+			buffer = potentialEndcap.surface.find_entities_filtered({area = {{potentialEndcap.position.x+DV[search_dir].x-.5,potentialEndcap.position.y+DV[search_dir].y-.5},{potentialEndcap.position.x+DV[search_dir].x+.5,potentialEndcap.position.y+DV[search_dir].y+.5}}, type="container"})[1]
+			
+			
+			if (buffer==nil) then
+			buffer = potentialEndcap.surface.find_entities_filtered({area = {{potentialEndcap.position.x+DV[search_dir].x-.5,potentialEndcap.position.y+DV[search_dir].y-.5},{potentialEndcap.position.x+DV[search_dir].x+.5,potentialEndcap.position.y+DV[search_dir].y+.5}}, type="logistic-container"})[1]			
+			end
+			
 			
 			--buffer = potentialEndcap.surface.find_entity("compound-splitter-buffer",{potentialEndcap.position.x+DV[search_dir].x,potentialEndcap.position.y+DV[search_dir].y})
 			if (buffer~=nil and buffer.valid) then
 				--debugPrint("endcap found, prospective splitter size: " .. #lanes)
 			else
-				
+				debugPrint("no buffer found. Remove endcap, place buffer and retry.")
+				return
 			end
 
 		end

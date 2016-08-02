@@ -1,3 +1,10 @@
+-0.2.6
+   - fix for unhandled exception when endcap is placed before buffer (another line 245 bug)
+   - new feature: any 1x1 container (including logistic containers) can be used as the buffer piece
+
+-0.2.5
+   - fix for error on creating new cs (line 245 bug)
+
 -0.2.4
    - fix for low output issue after 13.3
    - knownissue: lane pieces, totems, and the endcap don't get saved in blueprints

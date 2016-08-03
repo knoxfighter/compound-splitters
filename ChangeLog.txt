@@ -1,3 +1,10 @@
+<<<<<<< HEAD
+=======
+-0.2.7
+   - fixed typo causing unhandled exception at control.lua:338 in certain cases 
+   - deconstructing lane/totems/endcap now properly shutdown the splitter
+
+>>>>>>> refs/heads/0.13-preliminary
 -0.2.6
    - fix for unhandled exception when endcap is placed before buffer (another line 245 bug)
    - new feature: any 1x1 container (including logistic containers) can be used as the buffer piece

@@ -1,6 +1,10 @@
 {
 "name": "compoundsplitters",
+<<<<<<< HEAD
   "version": "0.2.6",
+=======
+  "version": "0.2.7",
+>>>>>>> refs/heads/0.13-preliminary
   "title": "Compound Splitters",
   "author": "Cmdr_Keen",
   "contact": "",

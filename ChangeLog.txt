@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 -0.2.7
    - fixed typo causing unhandled exception at control.lua:338 in certain cases 
@@ -12,6 +13,8 @@
 -0.2.5
    - fix for error on creating new cs (line 245 bug)
 
+=======
+>>>>>>> parent of 7c12979... 0.2.6 release
 -0.2.4
    - fix for low output issue after 13.3
    - knownissue: lane pieces, totems, and the endcap don't get saved in blueprints

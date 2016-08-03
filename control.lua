@@ -40,7 +40,9 @@ PERP = {
 script.on_init(function(event) onInit() end)
 script.on_load(function(event) onInit() end)
 script.on_event(defines.events.on_built_entity, function(event) onBuiltEventHandler(event) end)
-
+script.on_event(defines.events.on_entity_died, function(event) HandleRemovedFromGame(event) end)
+script.on_event(defines.events.on_preplayer_mined_item, function(event) HandleRemovedFromGame(event) end)
+script.on_event(defines.events.on_robot_pre_mined, function(event) HandleRemovedFromGame(event) end)
 
 script.on_configuration_changed( 
 function(data)
@@ -211,8 +213,6 @@ function onBuiltEventHandler(event)
 		    currentEntity = currentEntity.surface.find_entity("compound-splitter-lane",{currentEntity.position.x+DV[search_dir].x,currentEntity.position.y+DV[search_dir].y})
 	   	end
 	--find the chest to be used (buffer, or smart-buffer)
-<<<<<<< HEAD
-<<<<<<< HEAD
 	
 		-- 2.6 search by entity type, not for exact entity name, should allow for any container to be used.
 		if (potentialEndcap ~= nil and potentialEndcap.valid) then
@@ -223,31 +223,13 @@ function onBuiltEventHandler(event)
 			buffer = potentialEndcap.surface.find_entities_filtered({area = {{potentialEndcap.position.x+DV[search_dir].x-.5,potentialEndcap.position.y+DV[search_dir].y-.5},{potentialEndcap.position.x+DV[search_dir].x+.5,potentialEndcap.position.y+DV[search_dir].y+.5}}, type="logistic-container"})[1]			
 			end
 			
-=======
-		if (potentialEndcap ~= nil and potentialEndcap.valid) then
-			--buffer = potentialEndcap.surface.find_entities_filtered({area = {{potentialEndcap.position.x+DV[search_dir].x-.5,potentialEndcap.position.y+DV[search_dir].y-.5},{potentialEndcap.position.x+DV[search_dir].x+.5,potentialEndcap.position.y+DV[search_dir].y+.5}}, type="container"})[1]
-			--potential way to allow any chest become a buffer, add 2nd  search to allow logistic-container types too
->>>>>>> master
-=======
-		if (potentialEndcap ~= nil and potentialEndcap.valid) then
-			--buffer = potentialEndcap.surface.find_entities_filtered({area = {{potentialEndcap.position.x+DV[search_dir].x-.5,potentialEndcap.position.y+DV[search_dir].y-.5},{potentialEndcap.position.x+DV[search_dir].x+.5,potentialEndcap.position.y+DV[search_dir].y+.5}}, type="container"})[1]
-			--potential way to allow any chest become a buffer, add 2nd  search to allow logistic-container types too
->>>>>>> parent of 761a4d5... 0.2.6 release
 			
 			--buffer = potentialEndcap.surface.find_entity("compound-splitter-buffer",{potentialEndcap.position.x+DV[search_dir].x,potentialEndcap.position.y+DV[search_dir].y})
 			if (buffer~=nil and buffer.valid) then
 				--debugPrint("endcap found, prospective splitter size: " .. #lanes)
 			else
-<<<<<<< HEAD
-<<<<<<< HEAD
 				debugPrint("no buffer found. Remove endcap, place buffer and retry.")
 				return
-=======
-				
->>>>>>> master
-=======
-				
->>>>>>> parent of 761a4d5... 0.2.6 release
 			end
 
 		end
@@ -355,7 +337,7 @@ function onBuiltEventHandler(event)
 				belts[1][#belts[1] - currentBelt + 1] = currentEntity
 			end
 		end
-		if (totem[2] ~= nil and totem[1].valid) and
+		if (totem[2] ~= nil and totem[2].valid) and
 		  (math.abs(totem[2].position.x-belts[2][1].position.x) <=1) and
 		    (math.abs(totem[2].position.y-belts[2][1].position.y) <=1) 
 				then
@@ -419,6 +401,50 @@ function onBuiltEventHandler(event)
 	
 	end
 end
+
+--function to see if a removed entity is part of a compound splitter
+--parameters:
+-- entity- the entity that triggered the game event
+-- index- an index  for global.splitters
+
+function IsPartOfSplitter(entity,index)
+    if entity.name == "compound-splitter-endcap" then
+		return global.splitters[index].endcap == entity
+	end	
+    if entity.name == "compound-splitter-lane" then
+		for currentLane=1, #global.splitters[index].lanes,1 do
+			if global.splitters[index].lanes[currentLane] == entity then 
+				return true 
+			end
+		end
+		return false
+	end	
+    if entity.name == "compound-splitter-priority-totem" or 
+	   entity.name == "compound-splitter-round-robin-totem" then
+		return global.splitters[index].totems[1] == entity or global.splitters[index].totems[2] == entity
+	end
+ 
+ 
+	return false
+ end
+ 
+ function HandleRemovedFromGame(event)
+	--quickly determine if we need to check this entity out in detail
+	--all entities for this mod have a prefix of compound-splitter
+	--containers are handled by the ontick event
+	entity = event.entity
+	if (string.find(entity.name,"compound-splitter",1,true) == nil) then 
+		return
+	end
+	for index=1,#global.splitters,1 do
+		
+		if (IsPartOfSplitter(entity,index)) then	
+				debugPrint("Component Removed")
+				table.remove(global.splitters,index)
+				return
+			end
+		end
+	end
 
 function CreateNewSet()
 	return {	

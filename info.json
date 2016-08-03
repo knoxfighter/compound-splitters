@@ -1,26 +1,10 @@
 {
 "name": "compoundsplitters",
-<<<<<<< HEAD
-<<<<<<< HEAD
-  "version": "0.2.6",
+  "version": "0.2.7",
   "title": "Compound Splitters",
   "author": "Cmdr_Keen",
   "contact": "",
   "homepage": "https://forums.factorio.com/20443",
-=======
-  "version": "0.2.4",
-  "title": "Compound Splitters",
-  "author": "Cmdr_Keen",
-  "contact": "",
-  "homepage": "",
->>>>>>> master
-=======
-  "version": "0.2.4",
-  "title": "Compound Splitters",
-  "author": "Cmdr_Keen",
-  "contact": "",
-  "homepage": "",
->>>>>>> parent of 761a4d5... 0.2.6 release
   "description": "A Mod to allow for variable lane splitters with programmable behavior.",
   "dependencies": ["base >= 0.13.0"],
   "factorio_version": "0.13"

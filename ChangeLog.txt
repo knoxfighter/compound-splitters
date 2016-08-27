@@ -1,3 +1,6 @@
+-0.2.8
+   - made compatible with with release 0.14
+
 -0.2.7
    - fixed typo causing unhandled exception at control.lua:338 in certain cases 
    - deconstructing lane/totems/endcap now properly shutdown the splitter

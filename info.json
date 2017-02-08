@@ -1,11 +1,11 @@
 {
 "name": "compoundsplitters",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "title": "Compound Splitters",
   "author": "Cmdr_Keen",
   "contact": "",
   "homepage": "https://forums.factorio.com/20443",
-  "description": "A Mod to allow for variable lane splitters with programmable behavior.",
+  "description": "A Mod to allow for variable lane splitters with programmable behaviour.",
   "dependencies": ["base >= 0.14.0"],
   "factorio_version": "0.14"
 }

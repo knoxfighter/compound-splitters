@@ -1,3 +1,7 @@
+-0.2.9
+   - any belt may now be used in a compound splitter
+   - FIX: throughput issues on large priority splitters
+
 -0.2.8
    - made compatible with with release 0.14
 

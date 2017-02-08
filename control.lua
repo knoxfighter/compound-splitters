@@ -46,19 +46,19 @@ script.on_event(defines.events.on_robot_pre_mined, function(event) HandleRemoved
 
 script.on_configuration_changed( 
 function(data)
-	if data.mod_changes ~= nil and data.mod_changes["My Mod"] ~= nil and data.mod_changes["My Mod"].new_version == "0.1.4" then
-	--I don't know how "My Mod" referred to this mod in specific
-	--recipes changes in 0.1.4
-		recipes["cs-express-transport-belt"].reload()
-		recipes["compound-splitter-endcap"].reload()
-		recipes["compound-splitter-lane"].reload()
-		recipes["compound-splitter-priority-totem"].reload()
-		recipes["compound-splitter-round-robin-totem"].reload()
-		recipes["compound-splitter-buffer"].reload()
+	if data.mod_changes and data.mod_changes.compoundsplitters then 
+		oldVersion = data.mod_changes.compoundsplitters.old_version or nil
+		newVersion = data.mod_changes.compoundsplitters.new_version or nil
+	end
+	--add bestSpeed value to legacy splitters
+	if oldVersion ~=nil and oldVersion < "0.2.9" then
+		debugPrint("updating splitters for 0.2.9 compatibility")
+		for index = 1, #global.splitters,1 do
+			global.splitters[index].bestSpeed = global.splitters[index].bestSpeed or 0.09375
+		end
 	end
 end
 )
-
 
 function onInit(event)
 	global.splitters = global.splitters or {}
@@ -68,13 +68,14 @@ end
 
     -- 0.1.2 method of handling the compound splitter
 function handleSplitterBuffered(index)
-	local outputTransportLine = (global.splitters[index].outformat == FORMAT.ROUND_ROBIN) and global.splitters[index].outputLineCounter or 1
+	local splitter = global.splitters[index]
+	local outputTransportLine = (splitter.outformat == FORMAT.ROUND_ROBIN) and splitter.outputLineCounter or 1
 	local inputTransportLine = nil
 	local linesChecked = 1
 	local currentItemType = nil
 	local currentStack = nil
 
-	local bufferInventory = global.splitters[index].buffer.get_inventory(1);
+	local bufferInventory = splitter.buffer.get_inventory(1);
 	local bufferSize = bufferInventory.get_item_count()
 	
 -- load leveling: divisor is # of items buffered per lane. stack size impacts how useful the buffer size is.
@@ -87,13 +88,13 @@ function handleSplitterBuffered(index)
 --place items on output belts until buffer empty, load leveling conditions met, or 1 complete cycle of the output belts made.	
 	if (bufferSize > 0 ) then 
 		repeat 
-			if (global.splitters[index].outlines[outputTransportLine].can_insert_at_back()) then
+			if (splitter.outlines[outputTransportLine].can_insert_at_back()) then
 				if (bufferInventory.remove(currentStack) == 1 ) then
-					global.splitters[index].outlines[outputTransportLine].insert_at((1-0.000001),currentStack)--13.3 workaround 2nd try
+					splitter.outlines[outputTransportLine].insert_at((1-0.000001),currentStack)--13.3 workaround 2nd try
 					itemsOutputtedCounter = itemsOutputtedCounter + 1
 				else
 				--buffer emptied during loop, end early
-				linesChecked = #global.splitters[index].outlines + 1
+				linesChecked = #splitter.outlines + 1
 				end
 				
 			end
@@ -101,44 +102,45 @@ function handleSplitterBuffered(index)
 			outputTransportLine = outputTransportLine + 1
 			linesChecked = linesChecked + 1
 			
-			if (outputTransportLine > #global.splitters[index].outlines) then outputTransportLine = 1 end
+			if (outputTransportLine > #splitter.outlines) then outputTransportLine = 1 end
 			
-		until (itemsOutputtedCounter >= itemsToOutput or linesChecked > #global.splitters[index].outlines)
+		until (itemsOutputtedCounter >= itemsToOutput or linesChecked > #splitter.outlines)
 	end
 --try to fill buffer from input belts until buffer full or a complete cycle is made
-	if (itemsOutputtedCounter ~= 1 or bufferSize <960) then
-		inputTransportLine = (global.splitters[index].informat == FORMAT.ROUND_ROBIN) and global.splitters[index].inputLineCounter or 1 
+	if (itemsOutputtedCounter ~= 1 or bufferSize <2400) then
+		inputTransportLine = (splitter.informat == FORMAT.ROUND_ROBIN) and splitter.inputLineCounter or 1 
 		linesChecked = 1
 		repeat 
-			currentItemType = next(global.splitters[index].inlines[inputTransportLine].get_contents())
+			currentItemType = next(splitter.inlines[inputTransportLine].get_contents())
 			if (currentItemType ~= nil) then 
 				currentStack = {name = currentItemType, count = 1}
-				if bufferInventory.can_insert(currentStack) and not global.splitters[index].inlines[inputTransportLine].can_insert_at(0.0001) then
+				if bufferInventory.can_insert(currentStack) -- and not splitter.inlines[inputTransportLine].can_insert_at(0.0001) 
+				then
 				--swap into buffer
-					global.splitters[index].inlines[inputTransportLine].remove_item(currentStack)
+					splitter.inlines[inputTransportLine].remove_item(currentStack)
 					bufferInventory.insert(currentStack)
 					bufferSize = bufferSize + 1
 				else
 				-- buffer filled during loop, early end
-					linesChecked = #global.splitters[index].inlines + 1
+					linesChecked = #splitter.inlines + 1
 				end
 			end
 			inputTransportLine = inputTransportLine + 1
 			linesChecked = linesChecked + 1
-			if (inputTransportLine > #global.splitters[index].inlines) then inputTransportLine = 1 end--handle round robin array overflow
-		until (bufferSize >=960 or linesChecked > #global.splitters[index].inlines)
-		global.splitters[index].inputLineCounter = inputTransportLine
+			if (inputTransportLine > #splitter.inlines) then inputTransportLine = 1 end--handle round robin array overflow
+		until (bufferSize >=2400 or linesChecked > #splitter.inlines)
+		splitter.inputLineCounter = inputTransportLine
 	end
 
-	global.splitters[index].outputLineCounter = outputTransportLine
+	splitter.outputLineCounter = outputTransportLine
 	--schedule next tick
 	if (uC ~= 1) then 
-		global.splitters[index].lastItemTick = game.tick
-		global.splitters[index].nextTick = game.tick + 3
-	else if ((game.tick - global.splitters[index].lastItemTick) > 300) then
-			global.splitters[index].nextTick = game.tick + 60
+		splitter.lastItemTick = game.tick
+		splitter.nextTick = game.tick + math.floor(0.28125/splitter.bestSpeed)
+	else if ((game.tick - splitter.lastItemTick) > 300) then
+			splitter.nextTick = game.tick + 60
 		else
-			global.splitters[index].nextTick = game.tick+9
+			splitter.nextTick = game.tick+9
 		end
 	end
 end
@@ -152,7 +154,8 @@ function onTickEventHandler(event)
 	for index=1,#global.splitters,1 do
 		
 		if (global.splitters[index].nextTick <= game.tick) then	
-			if pcall(handleSplitterBuffered, index) then
+			local result, err = pcall(handleSplitterBuffered, index)
+			if result then
 			--if (true) then handleSplitterBuffered(index)
 				--no error
 			else
@@ -286,19 +289,34 @@ function onBuiltEventHandler(event)
 		local input, output
 		i = 1
 		local j,k = 1,1
+		local bestSpeed = 0
 		local currentPosition = {x=(endcap.position.x+DV[search_dir].x),y=(endcap.position.y+DV[search_dir].y)}
 		for i=1,#lanes,1 do
 			--side 1
-			currentEntity = surface.find_entity("cs-express-transport-belt",{currentPosition.x+DV[PERP[search_dir].a].x,currentPosition.y+DV[PERP[search_dir].a].y})
+			currentEntity = surface.find_entities_filtered{type="transport-belt",
+						area ={
+								{currentPosition.x+DV[PERP[search_dir].a].x-.5,currentPosition.y+DV[PERP[search_dir].a].y-.5},
+								{currentPosition.x+DV[PERP[search_dir].a].x+.5,currentPosition.y+DV[PERP[search_dir].a].y+.5}
+							},limit=1}[1] or nil
 			if (currentEntity ~= nil and currentEntity.valid) then 
 				belts[1][j] = currentEntity
 				j=j+1
+				if ( currentEntity.prototype.belt_speed > bestSpeed) then 
+					bestSpeed = currentEntity.prototype.belt_speed
+				end
 			end
 			--side 2
-			currentEntity = surface.find_entity("cs-express-transport-belt",{currentPosition.x+DV[PERP[search_dir].b].x,currentPosition.y+DV[PERP[search_dir].b].y})
+						currentEntity = surface.find_entities_filtered{type="transport-belt",
+						area ={
+								{currentPosition.x+DV[PERP[search_dir].b].x-.5,currentPosition.y+DV[PERP[search_dir].b].y-.5},
+								{currentPosition.x+DV[PERP[search_dir].b].x+.5,currentPosition.y+DV[PERP[search_dir].b].y+.5}
+							},limit=1}[1] or nil
 			if (currentEntity ~= nil and currentEntity.valid) then 
 				belts[2][k] = currentEntity
 				k=k+1
+				if ( currentEntity.prototype.belt_speed > bestSpeed) then 
+					bestSpeed = currentEntity.prototype.belt_speed
+				end
 			end
 			currentPosition.x = currentPosition.x + DV[search_dir].x
 			currentPosition.y = currentPosition.y + DV[search_dir].y
@@ -371,6 +389,7 @@ function onBuiltEventHandler(event)
 	-- add splitter to list of belts
 		newSplitter = CreateNewSet()
 		newSplitter.lanes = lanes
+		newSplitter.bestSpeed = bestSpeed
 		newSplitter.inbelts = belts[input]
 		newSplitter.outbelts = belts[output]
 		newSplitter.outlines = beltsOut
@@ -463,7 +482,8 @@ function CreateNewSet()
 				inputLineCounter = 1,
 				outputLineCounter = 1,
 				nextTick = nil,
-				lastItemTick = nil
+				lastItemTick = nil,
+				bestSpeed = 0.09375
 		   }
 end
 

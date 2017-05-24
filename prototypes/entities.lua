@@ -57,14 +57,15 @@ data:extend(
     circuit_wire_max_distance = transport_belt_circuit_wire_max_distance	
   },
   {
-    type = "simple-entity",
+    type = "simple-entity-with-force",
     name = "compound-splitter-endcap",
+	render_layer = "object",
     flags = {"placeable-neutral", "player-creation"},
+	order = "s-e-w-f",
     icon = "__compoundsplitters__/graphics/icons/water.png",--TODO:graphic
 	minable = {hardness = 0.2, mining_time = 0.5, result = "compound-splitter-endcap"},
     collision_box = {{-0.35, -0.35}, {0.35, 0.35}},
     selection_box = {{-0.5, -0.5}, {0.5, 0.5}},
-    render_layer = "object",
     max_health = 80,
     resistances =
     {
@@ -85,7 +86,7 @@ data:extend(
 
   },--entry
     {
-    type = "simple-entity",
+    type = "simple-entity-with-force",
     name = "compound-splitter-lane",
     flags = {"placeable-neutral", "player-creation"},
     icon = "__compoundsplitters__/graphics/icons/water.png",--TODO:graphic
@@ -113,7 +114,7 @@ data:extend(
 
   },--entry
     {
-    type = "simple-entity",
+    type = "simple-entity-with-force",
     name = "compound-splitter-priority-totem",
     flags = {"placeable-neutral", "player-creation"},
     icon = "__compoundsplitters__/graphics/icons/water.png",--TODO:graphic
@@ -141,7 +142,7 @@ data:extend(
 
   },--entry
     {
-    type = "simple-entity",
+    type = "simple-entity-with-force",
     name = "compound-splitter-round-robin-totem",
     flags = {"placeable-neutral", "player-creation"},
     icon = "__compoundsplitters__/graphics/icons/water.png",--TODO:graphic
@@ -214,7 +215,5 @@ data:extend(
     circuit_connector_sprites = get_circuit_connector_sprites({0.1875, 0.15625}, nil, 18),
     circuit_wire_max_distance = 7.5	
   },
-
-  
 }
 )

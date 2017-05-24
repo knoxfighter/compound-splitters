@@ -4,6 +4,7 @@ data:extend
     type = "technology",
     name = "compound-splitters",
     icon = "__compoundsplitters__/graphics/item-group/compound-splitters.png",
+	icon_size = 64,
     effects =
     {
       {
@@ -40,7 +41,7 @@ data:extend
         {"science-pack-1", 1},
         {"science-pack-2", 1},
         {"science-pack-3", 1},
-        {"alien-science-pack", 1}
+        {"high-tech-science-pack",1}
       },
       time = 60
     },

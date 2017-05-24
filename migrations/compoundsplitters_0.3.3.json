@@ -1,0 +1,9 @@
+{
+  "entity":
+  [
+    ["compound-splitter-lane", "compound-splitter-lane"],
+	["compound-splitter-endcap", "compound-splitter-endcap"],
+	["compound-splitter-priority-totem", "compound-splitter-priority-totem"],
+	["compound-splitter-round-robin-totem","compound-splitter-round-robin-totem"],
+  ],
+}

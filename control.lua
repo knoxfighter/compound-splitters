@@ -38,31 +38,95 @@ PERP = {
 	   }
 
 script.on_init(function(event) onInit() end)
-script.on_load(function(event) onInit() end)
 script.on_event(defines.events.on_built_entity, function(event) onBuiltEventHandler(event) end)
 script.on_event(defines.events.on_entity_died, function(event) HandleRemovedFromGame(event) end)
 script.on_event(defines.events.on_preplayer_mined_item, function(event) HandleRemovedFromGame(event) end)
 script.on_event(defines.events.on_robot_pre_mined, function(event) HandleRemovedFromGame(event) end)
+script.on_event(defines.events.on_tick,function(event) onTickEventHandler(event) end)
 
 script.on_configuration_changed( 
 function(data)
+	local oldVersion
+	local newVersion
 	if data.mod_changes and data.mod_changes.compoundsplitters then 
-		oldVersion = data.mod_changes.compoundsplitters.old_version or nil
-		newVersion = data.mod_changes.compoundsplitters.new_version or nil
+		
+		local index = 1
+		if (data.mod_changes.compoundsplitters.old_version) then
+			oldVersion = {}
+			for w in string.gmatch(data.mod_changes.compoundsplitters.old_version,"%d+") do
+				oldVersion[index] = tonumber(w)
+				index = index + 1
+			end
+		end
+		if (data.mod_changes.compoundsplitters.new_version) then
+			index = 1
+			newVersion = {}
+			for w in string.gmatch(data.mod_changes.compoundsplitters.new_version,"%d+") do
+				newVersion[index] = tonumber(w)
+				index = index + 1
+			end		
+		end
+	else
+		return
 	end
+
 	--add bestSpeed value to legacy splitters
-	if oldVersion ~=nil and oldVersion < "0.2.9" then
+	if  not(oldVersion ~=nil and 
+	    oldVersion[1] and
+		oldVersion[2] and 
+		oldVersion[3] and
+		oldVersion[1] >= 0 and 
+		oldVersion[2] >= 2 and 
+		oldVersion[3] >= 9 ) then
 		debugPrint("updating splitters for 0.2.9 compatibility")
 		for index = 1, #global.splitters,1 do
 			global.splitters[index].bestSpeed = global.splitters[index].bestSpeed or 0.09375
+
 		end
+	end
+
+	if  not (oldVersion ~=nil and 
+	    oldVersion[1] and
+		oldVersion[2] and 
+		oldVersion[3] and
+		oldVersion[1] >= 0 and 
+		oldVersion[2] >= 3 and 
+		oldVersion[3] >= 4 ) then
+		local splitters = 0
+		local pieces = 0
+		debugPrint("Migration to 0.3.4 - Rebuilding splitter backend-data- this may take some time.")
+		global.splitters = {}
+		for index = 1, #game.surfaces,1 do
+			local entities = game.surfaces[index].find_entities_filtered{name= "compound-splitter-endcap"}
+			for _,v in ipairs(entities) do
+				local event = {created_entity = v}
+				createSplitter(event,false)
+				splitters = splitters + 1
+			end
+		end
+		debugPrint(splitters.." splitter"..((splitters>1)and "s" or "").." migrated")
+		--change faction of migrated pieces 
+		for index = 1, #global.splitters do
+			local splitter = global.splitters[index]
+			local force = splitter.buffer.force
+			splitter.endcap.force = force
+			pieces = pieces + 1
+			for _,v in ipairs(splitter.totems) do
+				v.force = force
+				pieces = pieces + 1
+			end
+			for _,v in ipairs(splitter.lanes) do
+				v.force = force
+				pieces = pieces + 1			
+			end
+		end
+		debugPrint(pieces.." entity's force updated")
 	end
 end
 )
 
 function onInit(event)
 	global.splitters = global.splitters or {}
-			script.on_event(defines.events.on_tick,function(event) onTickEventHandler(event) end)
 			
 end
 
@@ -82,7 +146,9 @@ function handleSplitterBuffered(index)
 	local itemsToOutput = (bufferSize / 10) + 1
 	local itemsOutputtedCounter = 1
 	-- uses first item found and assumes the same item will be used for the rest of the function.
-	local currentItemType = next(bufferInventory.get_contents())
+	
+	local currentChest = bufferInventory.get_contents()
+	local currentItemType = next(currentChest)
 	local currentStack = {name=currentItemType,count = 1}
 	
 --place items on output belts until buffer empty, load leveling conditions met, or 1 complete cycle of the output belts made.	
@@ -93,14 +159,25 @@ function handleSplitterBuffered(index)
 					splitter.outlines[outputTransportLine].insert_at((1-0.000001),currentStack)--13.3 workaround 2nd try
 					itemsOutputtedCounter = itemsOutputtedCounter + 1
 				else
-				--buffer emptied during loop, end early
-				linesChecked = #splitter.outlines + 1
+				--buffer ran out of the type of item being outputted, find a new type
+					currentItemType = next(currentChest,currentItemType)
+					if (currentItemType~=nil) then
+						currentStack = {name = currentItemType,count = 1}
+						if (bufferInventory.remove(currentStack) == 1 ) then
+							splitter.outlines[outputTransportLine].insert_at((1-0.000001),currentStack)--13.3 workaround 2nd try
+							itemsOutputtedCounter = itemsOutputtedCounter + 1
+						else
+							linesChecked = #splitter.outlines + 1
+						end
+					else
+					--buffer is completely empty, end early
+						linesChecked = #splitter.outlines + 1
+					end
 				end
-				
 			end
 			
 			outputTransportLine = outputTransportLine + 1
-			linesChecked = linesChecked + 1
+			linesChecked = linesChecked + 1			
 			
 			if (outputTransportLine > #splitter.outlines) then outputTransportLine = 1 end
 			
@@ -147,7 +224,7 @@ end
 
 function onTickEventHandler(event)
 	if game.tick % 3 ~= 0  then return end -- quick exit
-	if #global.splitters == 0 then script.on_event(defines.events.on_tick, nil) end
+	--if #global.splitters == 0 then script.on_event(defines.events.on_tick, nil) end--removed because of desync detection
 	local index
 
 	--loop splitters in global
@@ -155,12 +232,18 @@ function onTickEventHandler(event)
 		
 		if (global.splitters[index].nextTick <= game.tick) then	
 			local result, err = pcall(handleSplitterBuffered, index)
+			--handleSplitterBuffered(index)
 			if result then
 			--if (true) then handleSplitterBuffered(index)
 				--no error
 			else
 				--derailed execution for a splitter, remove it.
-				debugPrint("Splitter stopped working")
+				local force = findForce(global.splitters[index])
+				if (force) then
+					force.print("Splitter stopped working")
+				else
+					debugPrint("Splitter stopped working")
+				end
 				table.remove(global.splitters,index)
 				return
 			end
@@ -169,20 +252,11 @@ function onTickEventHandler(event)
 end
 
 
---OnBuiltEventHandler
---if an endcap is placed, the event will check to see if it's a completed 
-function onBuiltEventHandler(event)
-	--figuring out if we have a complete compound entity
-	--in this initial version, we are ignoring robot placement which requires being able to build the compound entity in any order
-	--if endcap is placed, check the cardinal adjacent squares for the lane piece.
-	--there should be: 1 lane-piece (compound-splitter-lane) adjacent to this endcap
-	--if there is only one lane piece, we can determine direction to look for continuing lane pieces
-	--there should be up to 2 totems adjacent to the endcap and 'lane 1' that run perpendicular to the middle piece
-	--'walk' down the line of middle lane entities to find the buffer and totems attached to it.
-	--examine the 'above and below' positions to find belts and determine 'direction' above and below becomes in/out lanes
-	--grab the transport-lanes of each belt and store them in array of in/outlanes
-	--
-	if event.created_entity.name == "compound-splitter-endcap" then
+function createSplitter(event,feedback)
+	   local player_index = event.player_index or 1
+	   local player = game.players[player_index]
+	   local force = player.force
+	   if (not feedback) then force = game.forces["neutral"] end
 	   local surface = event.created_entity.surface
 	   local endcap = event.created_entity --first endpiece
 	   local buffer = nil
@@ -201,7 +275,7 @@ function onBuiltEventHandler(event)
 	    if foundLanePieces == 1 then --endpiece valid enough to continue.
 			--debugPrint("endcap placed, looking for other endcap")
 	    else
-			debugPrint("orphan endpiece: no detected lanes")
+			player.print("orphan endpiece: no detected lanes")
 			return
 		end
 	--find lane pieces
@@ -229,9 +303,9 @@ function onBuiltEventHandler(event)
 			
 			--buffer = potentialEndcap.surface.find_entity("compound-splitter-buffer",{potentialEndcap.position.x+DV[search_dir].x,potentialEndcap.position.y+DV[search_dir].y})
 			if (buffer~=nil and buffer.valid) then
-				--debugPrint("endcap found, prospective splitter size: " .. #lanes)
+				--player.print("endcap found, prospective splitter size: " .. #lanes)
 			else
-				debugPrint("no buffer found. Remove endcap, place buffer and retry.")
+				player.print("no buffer found. Remove endcap, place buffer and retry.")
 				return
 			end
 
@@ -273,10 +347,10 @@ function onBuiltEventHandler(event)
 	--do we have two on one side, then error and return
 		if (totemA1 ~= nil and totemA1.valid) and (totemB1 ~= nil and totemB1.valid) or
 		   (totemA2 ~= nil and totemA2.valid) and (totemB2 ~= nil and totemB2.valid) then
-			debugPrint("Invalid totem placement: only 1 totem per side")
+			player.print("Invalid totem placement: only 1 totem per side")
 			return
 		else
-			--debugPrint("valid totem placement")
+			--player.print("valid totem placement")
 		end
 		local totem = {}
 		totem[1] = totemA1 or totemB1
@@ -322,9 +396,9 @@ function onBuiltEventHandler(event)
 			currentPosition.y = currentPosition.y + DV[search_dir].y
 		end
 		if #belts[1] > 0 and #belts[2] > 0 then
-			--debugPrint("minimum belts found:")
+			--player.print("minimum belts found:")
 		else
-			debugPrint("missing an input or output belt")
+			player.print("missing an input or output belt")
 			return
 		end
 	--find input and output belt sides
@@ -342,7 +416,7 @@ function onBuiltEventHandler(event)
 			output = 1
 			input = 2
 		end
-		debugPrint(#belts[input] .. "-" .. #belts[output].." compound splitter detected")
+		player.print(#belts[input] .. "-" .. #belts[output].." compound splitter detected")
 	-- determine order of belts in belts array compared to totems
 		local currentBelt
 		if (totem[1] ~= nil and totem[1].valid) and
@@ -408,16 +482,32 @@ function onBuiltEventHandler(event)
 		newSplitter.nextTick = game.tick
 		newSplitter.lastItemTick = game.tick
 		
-		if #global.splitters == 0 then
-			script.on_event(defines.events.on_tick,function(event) onTickEventHandler(event) end)
-			global.gNext = game.tick
-		end
+		--if #global.splitters == 0 then
+		--	script.on_event(defines.events.on_tick,function(event) onTickEventHandler(event) end)
+		--	global.gNext = game.tick
+		--end
 		
 	table.insert(global.splitters,newSplitter)
 
 	
 	--debugPrint("spliter added to global.splitters")
-	
+end
+
+--OnBuiltEventHandler
+--if an endcap is placed, the event will check to see if it's a completed 
+function onBuiltEventHandler(event)
+	--figuring out if we have a complete compound entity
+	--in this initial version, we are ignoring robot placement which requires being able to build the compound entity in any order
+	--if endcap is placed, check the cardinal adjacent squares for the lane piece.
+	--there should be: 1 lane-piece (compound-splitter-lane-piece) adjacent to this endcap
+	--if there is only one lane piece, we can determine direction to look for continuing lane pieces
+	--there should be up to 2 totems adjacent to the endcap and 'lane 1' that run perpendicular to the middle piece
+	--'walk' down the line of middle lane entities to find the buffer and totems attached to it.
+	--examine the 'above and below' positions to find belts and determine 'direction' above and below becomes in/out lanes
+	--grab the transport-lanes of each belt and store them in array of in/outlanes
+	--
+	if event.created_entity.name == "compound-splitter-endcap" then
+		createSplitter(event,true)
 	end
 end
 
@@ -445,6 +535,31 @@ function IsPartOfSplitter(entity,index)
  
  
 	return false
+ end
+ 
+ --find the force of a splitter, by returning the first found entity with a force ID
+ function findForce(splitter)
+	--buffer
+	local force = splitter.buffer.force
+	if (force) then return force end
+	force = splitter.endcap.force
+	if (force) then return force end
+	--belts
+	for _,v in ipairs(splitter.beltsIn) do
+		if (v.force) then return v.force end
+	end
+	for _,v in ipairs(splitter.beltsOut) do
+		if (v.force) then return v.force end
+	end
+	--stuff that now has force
+	for _,v in ipairs(splitter.totems) do
+		if (v.force) then return v.force end
+	end
+	for _,v in ipairs(splitter.lanes) do
+		if (v.force) then return v.force end
+	end
+
+
  end
  
  function HandleRemovedFromGame(event)

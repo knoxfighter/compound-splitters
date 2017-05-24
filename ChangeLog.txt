@@ -1,6 +1,34 @@
+-0.3.4
+   - added migration script to fix known issue in 0.3.3
+      - the script data is rebuilt by searching for all endcaps and attempting to run the detection script
+        as if the endcap had just been placed.
+      - the force of the buffer piece is pushed to the entities that were migrated from "simple-entity" to
+        "simple-entity-with-force"
+   - messages relating to a splitter during placement of the endcap relay to the player creating it
+   - fixed group-icon/technology-icon image dimensions
+
+-0.3.3
+   - removed on-demand event registration for multiplayer compatibility
+   - all splitter pieces are now blueprintable. endcap must still be placed last
+   - known issue: only pieces placed after 0.3.3 are blueprintable
+
+-0.3.2
+   - fixed multiplayer join issue
+
+-0.3.1
+   - fixed missing info text
+
+-0.3.0
+   - Ported to 0.15
+   - Technology requires high tech science pack instead of alien science packs
+
+-0.2.10
+   - FIX: the splitter now searches the chest fully when trying to add items to the output belt.
+
 -0.2.9
    - any belt may now be used in a compound splitter
    - FIX: throughput issues on large priority splitters
+   - proper migration setup
 
 -0.2.8
    - made compatible with with release 0.14

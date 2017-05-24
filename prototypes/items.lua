@@ -7,7 +7,8 @@ data:extend
     name = "compound-splitters",
     order = "tm",
     inventory_order = "tm",
-    icon = "__compoundsplitters__/graphics/item-group/compound-splitters.png"
+    icon = "__compoundsplitters__/graphics/item-group/compound-splitters.png",
+	icon_size = 64,
   },
   {
     type = "item-subgroup",
@@ -82,4 +83,3 @@ data:extend
 		stack_size = 10
   },
 })
-
